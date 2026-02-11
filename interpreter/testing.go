@@ -73,3 +73,29 @@ func (i *Interpreter) ProcessTestSubroutine(scope icontext.Scope, sub *ast.Subro
 	}
 	return nil
 }
+
+func (i *Interpreter) ProcessTestLifecycle() error {
+	if err := i.ProcessRecv(); err != nil {
+		i.TestingState = ERROR
+		if i.ctx.ReturnState != nil {
+			i.ctx.ReturnState.Value = ERROR.String()
+			i.ctx.ReturnState.IsNotSet = false
+		}
+		return errors.WithStack(err)
+	}
+
+	finalState := LOG
+	if i.ctx != nil && i.ctx.IsLocallyGenerated != nil && i.ctx.IsLocallyGenerated.Value {
+		finalState = ERROR
+	} else if i.ctx != nil && i.ctx.Restarts > 0 {
+		finalState = RESTART
+	}
+
+	i.TestingState = finalState
+	if i.ctx.ReturnState != nil {
+		i.ctx.ReturnState.Value = finalState.String()
+		i.ctx.ReturnState.IsNotSet = false
+	}
+
+	return nil
+}
