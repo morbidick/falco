@@ -89,6 +89,21 @@ func testingFunctions(i *interpreter.Interpreter, defs *Definiions) Functions {
 				return false
 			},
 		},
+		"testing.run_lifecycle": {
+			Scope: allScope,
+			Call: func(ctx *context.Context, args ...value.Value) (value.Value, error) {
+				v, err := Testing_run_lifecycle(ctx, i, args...)
+				if err != nil {
+					return value.Null, err
+				}
+				ctx.ReturnState = value.Unwrap[*value.String](v)
+				return value.Null, nil
+			},
+			CanStatementCall: true,
+			IsIdentArgument: func(i int) bool {
+				return false
+			},
+		},
 		"testing.fixed_time": {Scope: allScope,
 			Call: func(ctx *context.Context, args ...value.Value) (value.Value, error) {
 				unwrapped, err := unwrapIdentArguments(i, args)
